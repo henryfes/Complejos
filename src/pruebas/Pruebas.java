@@ -32,7 +32,7 @@ public class Pruebas {
 		Complejo c1=new Complejo(8,-3);
 		Complejo c2=new Complejo(5,5);
 		Complejo esperado= new Complejo(55,25);
-		Complejo prueb=prueba.resta(c1, c2);
+		Complejo prueb=prueba.multiplicacion(c1, c2);
 		assertTrue(prueb.equals(esperado));
 	}
 	@Test
@@ -40,8 +40,8 @@ public class Pruebas {
 		Calculadora prueba= new Calculadora(true);
 		Complejo c1=new Complejo(8,-3);
 		Complejo c2=new Complejo(5,5);
-		Complejo esperado= new Complejo(55,25);
-		Complejo prueb=prueba.resta(c1, c2);
+		Complejo esperado= new Complejo(.5,-1.1);
+		Complejo prueb=prueba.division(c1, c2);
 		assertTrue(prueb.equals(esperado));
 	}
 	@Test

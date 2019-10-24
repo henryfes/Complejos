@@ -1,5 +1,7 @@
 package aplicacion;
 
+import java.util.Arrays;
+
 public class Matriz{
 	int filas;
 	int columnas;
@@ -38,7 +40,7 @@ public class Matriz{
 	}
 	
 	
-	public Complejo[][]suma(Matriz A, Matriz B) throws Exception {
+	public Matriz suma(Matriz A, Matriz B) throws Exception {
 
 		Complejo[][] res=new Complejo[A.get_filas()][A.get_colu()];
 		if (A.get_filas()!=B.get_filas() || A.get_colu()!=B.get_colu()) {
@@ -49,30 +51,39 @@ public class Matriz{
 				res[i][j]=A.get_matriz()[i][j].suma(B.get_matriz()[i][j]);
 			}
 		}
-		return res;
+		return  new Matriz(res);
 	}
 	
-	public Complejo[][]inverso(Matriz A) {
+	public Matriz inverso(Matriz A) {
 	
 		for(int i=0;i<A.get_filas();i++) {
 			for(int j=0;j<A.get_colu();j++) {
 				A.get_matriz()[i][j]=(new Complejo(-A.get_matriz()[i][j].get_real(),-A.get_matriz()[i][j].get_img()));
 			}
 		}
-		return A.get_matriz();
+		return A;
 	}
 	
-	public Complejo[][]Escalar(Matriz A, int escalar) {
+	public Matriz Escalar(Matriz A, int escalar) {
 		
 		for(int i=0;i<A.get_filas();i++) {
 			for(int j=0;j<A.get_colu();j++) {
 				A.get_matriz()[i][j]=A.get_matriz()[i][j].Escalar(escalar);
 			}
 		}
+		return A;
+	}
+public Complejo[][] EscalarCo(Matriz A, Complejo escalar) {
+		
+		for(int i=0;i<A.get_filas();i++) {
+			for(int j=0;j<A.get_colu();j++) {
+				A.get_matriz()[i][j]=A.get_matriz()[i][j].multiplicacion(escalar);
+			}
+		}
 		return A.get_matriz();
 	}
 	
-	public Complejo[][] multiplicacion(Matriz B) throws Exception {
+	public Matriz multiplicacion(Matriz B) throws Exception {
 		if (this.get_colu()!=B.get_filas()) {
 			throw new Exception("No se pueden multiplicar");
 		}
@@ -85,35 +96,177 @@ public class Matriz{
 				}
 			}
 		}
-		return res;
+		return new Matriz(res);
 	}
 	
-	public Complejo[][] transpuesta () {
+	public Matriz transpuesta () {
 		Complejo[][] res=new Complejo[this.get_colu()][this.get_filas()];
 		for(int i=0;i<res.length;i++) {
 			for(int j=0;j<res[i].length;j++) {
 				res[i][j]=this.get_matriz()[j][i];
 			}
 		}
-		return res;
+		return new Matriz(res);
 	}
 	
-	public Complejo[][] Conjugada () {
+	public Matriz Conjugada () {
 		
 		for(int i=0;i<this.get_filas();i++) {
 			for(int j=0;j<this.get_colu();j++) {
 				this.get_matriz()[i][j]=this.get_matriz()[i][j].get_conj();
 			}
 		}
-		return this.get_matriz();
+		return this;
 	}
 	
-	public Complejo[][] adjunta () {
-		Complejo[][] resp=this.get_matriz();
-		resp=this.transpuesta();
-		Matriz respu= new Matriz(resp);
-		Complejo[][] respuesta = respu.Conjugada();
+	public Matriz adjunta () {
+	
+		Matriz resp=this.transpuesta();
+		Matriz respuesta = resp.Conjugada();
 		
 		return respuesta;
 	}
+	
+	public double norma (Matriz A) throws Exception{
+		return Math.sqrt(productointerno(A));
+	}
+	public double productointerno (Matriz A) throws Exception {
+		double respu=0;
+		Matriz aux = A.adjunta();
+		Matriz res= aux.multiplicacion(A);
+		for (int i=0;i<res.get_filas();i++) {
+			for (int j=0;j<res.get_colu();i++) {
+				if(i==j) {
+					respu+=Math.sqrt(Math.pow(res.get_matriz()[i][j].get_real(),2)+Math.pow(res.get_matriz()[i][j].get_img(),2));
+				}
+			}
+		}
+		return respu;
+	}
+	
+	public double distancia (Matriz A,Matriz B) throws Exception{
+		return norma(A.suma(A, (B.inverso(B))));
+	}
+	public Matriz unit(int filas,int colum) {
+		Matriz res=new Matriz(filas,colum);
+		for(int i=0;i<filas;i++) {
+			for (int j=0;j<colum;i++) {
+				if (i==j) {
+				res.get_matriz()[i][j]=new Complejo(1,1);
+				}
+				else {
+					res.get_matriz()[i][j]=new Complejo(0,0);
+				}
+			}
+		}
+	return res;
+	}
+	public boolean isHermitian (Matriz A){
+		boolean res=false;
+		if (A.equals(A.adjunta())){
+			res=true;
+		}
+		return res;
+	}
+	
+	public boolean isUnit (Matriz A) throws Exception{
+		boolean res=false;
+		if (A.transpuesta().multiplicacion(A).equals(A.unit(A.get_filas(), A.get_colu()))){
+			res=true;
+		}
+		return res;
+	}
+	
+	/**
+	 * Imprimir la matriz
+	 */
+	public void imprimir() {
+		System.out.println();
+		for (int i = 0; i < A.length; i++) {
+			for (int j = 0; j < A[i].length; j++) {
+				System.out.print("("+ A[i][j].get_real() + ", " + A[i][j].get_img() + ")" + " ");
+			}
+			System.out.println();
+		}
+		System.out.println();
+	}
+	
+	/**
+	 * Retorna el producto tensor de la matriz con otra dada
+	 * @param B Es la otra matriz
+	 * @return La nueva matriz con el producto tensor
+	 */
+	public Matriz productoTensor(Matriz B) {
+		Complejo[][] res =  new Complejo[this.get_filas()*B.get_filas()][this.get_colu()*B.get_colu()];
+		int cont = 0, cont2 = 0, auxInt = 0;
+		for (int i = 0; i < this.get_matriz().length; i++) {
+			for (int j = 0; j < this.get_matriz()[i].length; j++) {
+				Complejo[][] aux = B.EscalarCo(B,this.get_matriz()[i][j]);
+				auxInt = aux.length;
+				for (int k = 0; k < aux.length; k++) {
+					for (int l = 0; l < aux[k].length; l++) {
+						res[k + cont][l + cont2] = aux[k][l];
+					} 
+				}
+				cont2 += aux[i].length;
+				if (cont2 >= res[i].length) cont2 = 0;
+			}
+			cont += auxInt;
+			if (cont >= res.length) cont = 0;
+		}
+		
+		return new Matriz(res);
+	}
+	
+	public void imprimirRes(Complejo[][] res) {
+		System.out.println();
+		for (int i = 0; i < res.length; i++) {
+			for (int j = 0; j < res[i].length; j++) {
+				if (res[i][j] == null) {
+					System.out.println("(0,0)");
+					continue;
+				}
+				System.out.print("("+ res[i][j].get_real() + ", " + res[i][j].get_img() + ")" + " ");
+			}
+			System.out.println();
+		}
+		System.out.println();
+	}
+	
+	
+	public Vector experimentoCanicas(int clicks, Matriz m, Vector v) {
+		for (int i = 0; i < clicks; i++) {
+			v = v.multiplicacion(m);
+		}
+		return v;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.deepHashCode(A);
+		result = prime * result + columnas;
+		result = prime * result + filas;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Matriz other = (Matriz) obj;
+		if (!Arrays.deepEquals(A, other.A))
+			return false;
+		if (columnas != other.columnas)
+			return false;
+		if (filas != other.filas)
+			return false;
+		return true;
+	}
+	
 }
