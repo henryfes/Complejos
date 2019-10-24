@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class Matriz{
 	int filas;
 	int columnas;
-	Complejo[][] A;
+	Complejo A[][];
 	public Matriz(int fil, int col) {
 		A = new Complejo[fil][col];
 		filas=fil;
@@ -40,15 +40,15 @@ public class Matriz{
 	}
 	
 	
-	public Matriz suma(Matriz A, Matriz B) throws Exception {
+	public Matriz suma(Matriz B) throws Exception {
 
-		Complejo[][] res=new Complejo[A.get_filas()][A.get_colu()];
-		if (A.get_filas()!=B.get_filas() || A.get_colu()!=B.get_colu()) {
+		Complejo[][] res=new Complejo[this.get_filas()][this.get_colu()];
+		if (this.get_filas()!=B.get_filas() || this.get_colu()!=B.get_colu()) {
 			throw new Exception();
 		}
-		for(int i=0;i<A.get_filas();i++) {
-			for(int j=0;j<A.get_colu();j++) {
-				res[i][j]=A.get_matriz()[i][j].suma(B.get_matriz()[i][j]);
+		for(int i=0;i<B.get_filas();i++) {
+			for(int j=0;j<B.get_colu();j++) {
+				res[i][j]=this.get_matriz()[i][j].suma(B.get_matriz()[i][j]);
 			}
 		}
 		return  new Matriz(res);
@@ -64,25 +64,25 @@ public class Matriz{
 		return A;
 	}
 	
-	public Matriz Escalar(Matriz A, int escalar) {
+	public Matriz Escalar(int escalar) {
 		
-		for(int i=0;i<A.get_filas();i++) {
-			for(int j=0;j<A.get_colu();j++) {
-				A.get_matriz()[i][j]=A.get_matriz()[i][j].Escalar(escalar);
+		for(int i=0;i<A.length;i++) {
+			for(int j=0;j<A[0].length;j++) {
+				A[i][j]= new Complejo(escalar*A[i][j].get_real(),escalar*A[i][j].get_img());
 			}
 		}
-		return A;
+		return new Matriz(A);
 	}
-public Complejo[][] EscalarCo(Matriz A, Complejo escalar) {
+public Matriz EscalarCo(Matriz A, Complejo escalar) {
 		
 		for(int i=0;i<A.get_filas();i++) {
 			for(int j=0;j<A.get_colu();j++) {
 				A.get_matriz()[i][j]=A.get_matriz()[i][j].multiplicacion(escalar);
 			}
 		}
-		return A.get_matriz();
+		return A;
 	}
-	
+
 	public Matriz multiplicacion(Matriz B) throws Exception {
 		if (this.get_colu()!=B.get_filas()) {
 			throw new Exception("No se pueden multiplicar");
@@ -100,7 +100,7 @@ public Complejo[][] EscalarCo(Matriz A, Complejo escalar) {
 	}
 	
 	public Matriz transpuesta () {
-		Complejo[][] res=new Complejo[this.get_colu()][this.get_filas()];
+		Complejo[][] res=new Complejo[A.length][A[0].length];
 		for(int i=0;i<res.length;i++) {
 			for(int j=0;j<res[i].length;j++) {
 				res[i][j]=this.get_matriz()[j][i];
@@ -121,10 +121,9 @@ public Complejo[][] EscalarCo(Matriz A, Complejo escalar) {
 	
 	public Matriz adjunta () {
 	
-		Matriz resp=this.transpuesta();
-		Matriz respuesta = resp.Conjugada();
+		Complejo [][] resp=this.transpuesta().Conjugada().get_matriz();
 		
-		return respuesta;
+		return new Matriz(resp);
 	}
 	
 	public double norma (Matriz A) throws Exception{
@@ -145,7 +144,7 @@ public Complejo[][] EscalarCo(Matriz A, Complejo escalar) {
 	}
 	
 	public double distancia (Matriz A,Matriz B) throws Exception{
-		return norma(A.suma(A, (B.inverso(B))));
+		return norma(A.suma((B.inverso(B))));
 	}
 	public Matriz unit(int filas,int colum) {
 		Matriz res=new Matriz(filas,colum);
@@ -177,9 +176,7 @@ public Complejo[][] EscalarCo(Matriz A, Complejo escalar) {
 		return res;
 	}
 	
-	/**
-	 * Imprimir la matriz
-	 */
+	
 	public void imprimir() {
 		System.out.println();
 		for (int i = 0; i < A.length; i++) {
@@ -191,17 +188,13 @@ public Complejo[][] EscalarCo(Matriz A, Complejo escalar) {
 		System.out.println();
 	}
 	
-	/**
-	 * Retorna el producto tensor de la matriz con otra dada
-	 * @param B Es la otra matriz
-	 * @return La nueva matriz con el producto tensor
-	 */
+	
 	public Matriz productoTensor(Matriz B) {
-		Complejo[][] res =  new Complejo[this.get_filas()*B.get_filas()][this.get_colu()*B.get_colu()];
+		Complejo[][] res =  new Complejo[A.length * B.get_matriz().length][A[0].length * B.get_matriz()[0].length];
 		int cont = 0, cont2 = 0, auxInt = 0;
-		for (int i = 0; i < this.get_matriz().length; i++) {
-			for (int j = 0; j < this.get_matriz()[i].length; j++) {
-				Complejo[][] aux = B.EscalarCo(B,this.get_matriz()[i][j]);
+		for (int i = 0; i < A.length; i++) {
+			for (int j = 0; j < A[i].length; j++) {
+				Complejo[][] aux = B.EscalarCo(B,(A[i][j])).get_matriz();
 				auxInt = aux.length;
 				for (int k = 0; k < aux.length; k++) {
 					for (int l = 0; l < aux[k].length; l++) {
@@ -215,6 +208,19 @@ public Complejo[][] EscalarCo(Matriz A, Complejo escalar) {
 			if (cont >= res.length) cont = 0;
 		}
 		
+		return new Matriz(res);
+	}
+	
+	public Matriz inversa() {
+		Complejo[][] res = new Complejo[A.length][A[0].length];
+		for (int i = 0; i < A.length; i++) {
+			for (int j = 0; j < A[i].length; j++) {
+				double aux1 = -A[i][j].get_real(), aux2 = -A[i][j].get_img();
+				if (A[i][j].get_real() == 0) aux1 = 0;
+				if (A[i][j].get_img() == 0) aux2 = 0;
+				res[i][j] = new Complejo(aux1, aux2);
+			}
+		}
 		return new Matriz(res);
 	}
 	
@@ -242,31 +248,20 @@ public Complejo[][] EscalarCo(Matriz A, Complejo escalar) {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + Arrays.deepHashCode(A);
-		result = prime * result + columnas;
-		result = prime * result + filas;
-		return result;
-	}
-
-	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Matriz other = (Matriz) obj;
-		if (!Arrays.deepEquals(A, other.A))
-			return false;
-		if (columnas != other.columnas)
-			return false;
-		if (filas != other.filas)
-			return false;
-		return true;
+		return (this.hashCode() == obj.hashCode());
+	}
+	
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		for (int i = 0; i < A.length; i++) {
+			for (int j = 0; j < A[i].length; j++) {
+				hash = 53 * hash + (int) (Double.doubleToLongBits(A[i][j].get_real()) ^ (Double.doubleToLongBits(A[i][j].get_real()) >>> 32));
+				hash = 53 * hash + (int) (Double.doubleToLongBits(A[i][j].get_img()) ^ (Double.doubleToLongBits(A[i][j].get_img()) >>> 32));
+			}
+		}
+		return hash;
 	}
 	
 }

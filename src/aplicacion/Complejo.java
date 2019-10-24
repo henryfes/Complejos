@@ -52,6 +52,10 @@ public class Complejo {
 		return new Complejo(escalar*this.get_real(),escalar*this.get_img());
 	}
 	
+	public void imprimir() {
+		System.out.print("("+ real + ", " + img + ")" + " ");
+	}
+	
 	@Override
 	public boolean equals(Object c) {
 		return (this.hashCode() == c.hashCode());

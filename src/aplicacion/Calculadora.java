@@ -34,14 +34,14 @@ public class Calculadora {
 		*/}
 		
 	}
-	public Complejo suma(Complejo c1,Complejo c2) {
+	public static Complejo suma(Complejo c1,Complejo c2) {
 		return c1.suma(c2);
 	} 
 	public Complejo resta(Complejo c1,Complejo c2) {
 		return c1.resta(c2);
 	}
 	
-	public Complejo multiplicacion(Complejo c1,Complejo c2) {
+	public static Complejo multiplicacion(Complejo c1,Complejo c2) {
 	
 		return c1.multiplicacion(c2);
 	}
